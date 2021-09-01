@@ -1,26 +1,21 @@
 const { Router } = require("express");
-const { Country } = require("../db");
 const router = Router();
+const {
+  getAllCountries,
+  getByID,
+  addCountry,
+  updateCountry,
+  deleteCountry,
+} = require("../controllers/countries");
 
-router.get("/", (req, res) => {
-  Country.findAll()
-    .then((country) => res.send(country))
-    .catch((error) => next(error));
+router.get("/", getAllCountries);
 
-router.get("/:id", (req, res) => {
-  Country.findAll()
-    .then((country) => res.send(country))
-    .catch((error) => next(error));
-});
+router.get("/:id", getByID);
 
-router.post("/", (req, res) => {
-  res.send("Ruta countries");
-});
-router.put("/", (req, res) => {
-  res.send("Ruta countries");
-});
-router.delete("/", (req, res) => {
-  res.send("Ruta countries");
-});
+router.post("/", addCountry);
+
+router.put("/", updateCountry);
+
+router.delete("/", deleteCountry);
 
 module.exports = router;
