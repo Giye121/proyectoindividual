@@ -1,0 +1,202 @@
+import React from "react";
+import { connect } from "react-redux";
+import {
+  getCountries,
+  postActivity,
+  getAllActivities,
+} from "../../redux/actions";
+import { useState, useEffect } from "react";
+import { validate } from "../utils/index";
+import styles from "./styles.module.css";
+import { Link } from "react-router-dom";
+function ActivityPost({ countries, activityPost, getAllCountries }) {
+  const [input, setInput] = useState({
+    name: "",
+    dificulty: "", // 1 a 5
+    duration: "",
+    season: "",
+    countries: [], //otoño, invierno, primavera, verano
+  });
+
+  const [errors, setErrors] = useState({
+    name: "",
+    duration: "",
+    countries: "",
+  });
+
+  useEffect(() => {
+    getAllCountries();
+    getAllActivities();
+  }, []);
+
+  //mis handlers
+  function handleInputChange(event) {
+    setErrors(
+      validate({
+        ...input,
+        [event.target.name]: event.target.value,
+      })
+    );
+
+    setInput({
+      ...input,
+      [event.target.name]: event.target.value,
+    });
+  }
+
+  function handleCountriesSelection(event) {
+    if (event.target.value === "") {
+      setErrors({
+        ...errors,
+        countries: "Must select one or several countries ",
+      });
+      return;
+    }
+    setErrors({
+      ...errors,
+      countries: "",
+    });
+    const countryExists = input.countries.find(
+      (item) => item === event.target.innerText
+    );
+
+    if (!countryExists) {
+      setInput({
+        ...input,
+        countries: [...input.countries, event.target.value],
+      });
+    }
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    activityPost(input);
+  }
+
+  function onCLickSubmit() {
+    if (
+      !input.name ||
+      !input.difficulty ||
+      !input.duration ||
+      !input.countries ||
+      !input.season
+    ) {
+      alert("Must complete all fields!");
+    } else {
+      alert("Activity created successfully!");
+    }
+  }
+
+  //render
+  console.log("Hola Estoy ACAAA");
+  return (
+    <div>
+      <div className={styles.container}>
+        <Link to={"/home"} className={styles.btnHome}>
+          Home{" "}
+        </Link>
+        <form className={styles.form} onSubmit={handleSubmit}>
+          <div className={styles.elements}>
+            <input
+              className={styles.select}
+              name="name"
+              type="text"
+              value={input.name}
+              onChange={handleInputChange}
+              placeholder="Activity"
+            />
+            {errors.name && <p>{errors.name}</p>}
+          </div>
+          <div></div>
+          <div>
+            <select
+              className={styles.selectSeason}
+              onChange={handleInputChange}
+              name="season"
+            >
+              <option value={input.season}>{"Elegir Termporada"}</option>
+              <option value="verano">Summer</option>
+              <option value="otoño">Autumn</option>
+              <option value="invierno">Winter</option>
+              <option value="primavera">Spring</option>
+              <option value="allseasons">All year</option>
+            </select>
+          </div>
+
+          <div></div>
+          <div>
+            <select
+              className={styles.selectDifficulty}
+              onChange={handleInputChange}
+              name="difficulty"
+            >
+              <option value={input.difficulty}>{"Choose difficulty"}</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+
+          <div></div>
+          <div>
+            <input
+              className={
+                styles.select
+              } /* className={errors.duration && 'danger'} */
+              name="duration"
+              type="number"
+              value={input.duration}
+              onChange={handleInputChange}
+              placeholder="Hour duration"
+            />
+            {errors.duration && <p className="danger">{errors.duration}</p>}
+          </div>
+
+          <select
+            className={styles.selectCountry}
+            onChange={handleCountriesSelection}
+          >
+            <option value="">Select countries!</option>
+            {countries &&
+              countries.map((item) => {
+                return <option value={item.id}>{item.name}</option>;
+              })}
+          </select>
+          <input
+            className={styles.inputCountry}
+            name="countries"
+            type="text"
+            value={input.countries}
+            onChange={handleInputChange}
+            placeholder="País"
+          />
+          {errors.countries && <p className="danger">{errors.countries}</p>}
+          <input
+            className={styles.btnCrear}
+            onClick={onCLickSubmit}
+            type="submit"
+            value="Create Tourist Activity"
+          />
+        </form>
+      </div>
+    </div>
+  );
+}
+
+const mapStateToProps = (state) => {
+  console.log(state);
+  return {
+    countries: state.countries,
+  };
+};
+const mapDispatchToProps = (dispatch) => {
+  return {
+    activityPost: (activity) => dispatch(postActivity(activity)),
+    getAllCountries: () => dispatch(getCountries()),
+    getAllActivities: () => dispatch(getAllActivities()),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(ActivityPost);
